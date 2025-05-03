@@ -2,7 +2,6 @@
 	graph
 	This problem requires you to implement a basic graph functio
 */
-// I AM NOT DONE
 
 use std::collections::{HashMap, HashSet};
 use std::fmt;
@@ -29,7 +28,20 @@ impl Graph for UndirectedGraph {
         &self.adjacency_table
     }
     fn add_edge(&mut self, edge: (&str, &str, i32)) {
-        //TODO
+        // 先用匹配获取边的信息
+        let (node1, node2, weight) = edge;
+        // 检查两个节点是否都在邻接表中，如果不再就add_node
+        if !self.contains(node1) {
+            self.add_node(node1);
+        }
+        if !self.contains(node2) {
+            self.add_node(node2);
+        }
+        // 获取邻接表，因为不用insert，所以不用可变引用
+        let table = self.adjacency_table_mutable();
+        // 通过hashmap的get_mut获取节点list的可变引用
+        table.get_mut(&node1.to_string()).unwrap().push((String::from(node2), weight));
+        table.get_mut(&node2.to_string()).unwrap().push((String::from(node1), weight));
     }
 }
 pub trait Graph {
@@ -37,12 +49,17 @@ pub trait Graph {
     fn adjacency_table_mutable(&mut self) -> &mut HashMap<String, Vec<(String, i32)>>;
     fn adjacency_table(&self) -> &HashMap<String, Vec<(String, i32)>>;
     fn add_node(&mut self, node: &str) -> bool {
-        //TODO
-		true
+        // 检查节点是否存在
+        // 如果存在返回false
+        // 如果不存在则获取mutable hashmap，用insert插入节点
+        if self.contains(node) {
+            false
+        } else {
+            self.adjacency_table_mutable().insert(String::from(node), Vec::new());
+            true
+        }
     }
-    fn add_edge(&mut self, edge: (&str, &str, i32)) {
-        //TODO
-    }
+    fn add_edge(&mut self, edge: (&str, &str, i32));
     fn contains(&self, node: &str) -> bool {
         self.adjacency_table().get(node).is_some()
     }
